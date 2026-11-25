@@ -13,7 +13,7 @@
   <a class="skip" href="#check">跳到检查台</a>
   <header class="top wrap" id="top">
     <a href="./" class="brand"><img src="./assets/logo.png" alt="研选家" width="90"><span>AI 工具检查台</span></a>
-    <nav aria-label="站点导航"><a href="#check">检查台</a><a href="#signals-title">检测信号</a><a href="#guide">使用说明</a><a href="https://xiaocaoyiran-hash.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">运营知识库 ↗</a></nav>
+    <nav aria-label="站点导航"><a href="#check">检查台</a><a href="#signals-title">检测信号</a><a href="#ip-title">IP 纯净度</a><a href="#guide">使用说明</a><a href="https://xiaocaoyiran-hash.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">运营知识库 ↗</a></nav>
   </header>
 
   <main class="wrap">
@@ -36,8 +36,9 @@
         <article class="panel result">
           <div class="selected"><div class="provider-mark" id="active-icon" aria-hidden="true"></div><div><h2 id="active-name">ChatGPT</h2><p id="active-scope">OpenAI · 网页服务</p></div></div>
           <div class="dial" id="dial" aria-hidden="true">
-            <div class="dial-content"><strong id="dial-number">–</strong><span>/ 6 项通过</span></div>
+            <div class="dial-content"><strong id="dial-number">–</strong><span>/ 100 环境信号分</span></div>
           </div>
+          <p id="signal-summary" class="dial-summary" aria-live="polite">环境信号待检查</p>
           <dl class="metrics" aria-label="检查概览">
             <div><dt>浏览器条件</dt><dd id="local-summary" data-state="idle">待检查</dd><p id="local-caption">在线提示 · HTTPS · 存储等</p></div>
             <div><dt>官方服务状态</dt><dd id="service-summary" data-state="idle">待查看</dd><p id="service-caption">读取所选工具的官方状态</p></div>
@@ -50,13 +51,44 @@
           </div>
         </article>
       </div>
+      <section class="panel hits" aria-labelledby="hits-title">
+        <div class="details-head"><h2 id="hits-title">命中的信号</h2><p id="hit-summary" role="status">开始检查后显示每项命中和得分。</p></div>
+        <ul id="hits" class="hit-list"></ul>
+        <a class="subtle-link" href="#signals-title">查看全部信号和计分规则 ↓</a>
+      </section>
+      <section class="panel ip" aria-labelledby="ip-title">
+        <div class="details-head"><h2 id="ip-title">IP 纯净度</h2><span>公网出口</span></div>
+        <p class="signals-intro" id="ip-consent">点击后，浏览器向 IPfastcheck 查询。该服务会看到并可能记录本次请求的公网出口 IP。</p>
+        <div class="ip-actions">
+          <button id="ip-run" class="action secondary" type="button" aria-describedby="ip-consent">检测当前出口 IP</button>
+          <p id="ip-status" role="status"></p>
+        </div>
+        <div id="ip-result" class="ip-result" hidden>
+          <div class="ip-result-head">
+            <div class="ip-number"><strong id="ip-score"></strong><span>/ 100</span></div>
+            <span id="ip-type" class="ip-type"></span>
+          </div>
+          <p id="ip-risk"></p>
+          <dl class="ip-meta">
+            <div><dt>出口 IP</dt><dd id="ip-address"></dd></div>
+            <div><dt>估计位置</dt><dd id="ip-location"></dd></div>
+            <div><dt>网络 / ASN</dt><dd id="ip-network"></dd></div>
+          </dl>
+          <ul id="ip-flags" class="hit-list" aria-label="IP 标记"></ul>
+        </div>
+        <details class="method">
+          <summary>IP 纯净度怎么计算</summary>
+          <p>用 IPfastcheck 看到的公网出口查询归属地与 ASN。纯净度等于 100 减去该数据源返回的风险值。代理、VPN、Tor、机房和滥用标记来自该数据源，缺失项显示「未知」。归属地为估计值，分数仅用于了解当前出口网络的记录。</p>
+          <a class="subtle-link" href="https://ipfastcheck.com/api" target="_blank" rel="noopener noreferrer">查看 IP 数据源和字段说明 ↗</a>
+        </details>
+      </section>
       <aside class="panel links" aria-labelledby="links-title">
         <h3 id="links-title">官方入口</h3>
         <ul id="provider-links"></ul>
       </aside>
       <section class="panel signals" aria-labelledby="signals-title">
-        <div class="details-head"><h2 id="signals-title">检测哪些信号</h2><span>10 项环境观察</span></div>
-        <p class="signals-intro">环境信号帮助定位浏览器差异。上方圆环反映下面 6 项基础条件的通过数。</p>
+        <div class="details-head"><h2 id="signals-title">检测哪些信号</h2><span>10 项 · 满分 100</span></div>
+        <p class="signals-intro">逐项按下方条件计分，相加得到环境信号分。未命中显示 +0，未测得显示 —。得分反映本页规则命中的环境特征，供排查浏览器差异。</p>
         <ol id="signals" class="signal-list"></ol>
       </section>
       <div class="panel details">
@@ -71,11 +103,11 @@
       <div class="guide-grid">
         <article><h3>浏览器有提示</h3><p>展开对应项目，查看浏览器当前报告的条件。改动设置后可以重新检查。</p></article>
         <article><h3>官方通报异常</h3><p>打开官方状态页，确认受影响的产品和故障进展。Gemini 的自动结果取自 Workspace 状态页。</p></article>
-        <article><h3>需要查账号权限</h3><p>通过官方入口实际登录确认。检测结果只覆盖浏览器条件和可读取的官方状态。</p></article>
+        <article><h3>需要查账号权限</h3><p>通过官方入口实际登录确认。环境信号分与 IP 纯净度均由本页规则生成，账号权限以工具官方页面为准。</p></article>
       </div>
       <details class="privacy">
         <summary>检测会读取哪些信息？</summary>
-        <p>浏览器项目在本页运行。点击检查时，浏览器直接向官方状态源发起请求，状态源会收到普通网页请求的网络信息。本站没有接收检测结果的服务器。</p>
+        <p>浏览器信号在本页读取，WebRTC 检查只查看本机候选。点击「开始检查」时，官方状态源会收到普通网页请求。点击「检测当前出口 IP」时，浏览器才会向 IPfastcheck 发起查询。页面不上传逐项检测结果。</p>
       </details>
     </section>
   </main>

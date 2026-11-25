@@ -1,3 +1,6 @@
+import { environmentSignals, readSignals } from './signals.mjs';
+import { checkPublicIp, ipFlags } from './network.mjs';
+
 const providers = {
   chatgpt: {
     name: 'ChatGPT', mark: 'G', scope: 'OpenAI · ChatGPT 网页相关组件',
@@ -93,84 +96,6 @@ const browserChecks = [
   },
 ];
 
-const environmentSignals = [
-  {
-    title: '系统时区',
-    note: '读取浏览器使用的时区名称。',
-    read: () => Intl.DateTimeFormat().resolvedOptions().timeZone,
-  },
-  {
-    title: '浏览器语言',
-    note: '读取浏览器报告的语言偏好顺序。',
-    read: () => navigator.languages?.slice(0, 5).join('、') || navigator.language,
-  },
-  {
-    title: '中文字体样本',
-    note: '用少量字符测试中文字体的渲染差异。结果受字体替换和浏览器限制影响。',
-    read: () => fontSamples(['Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC'], '研选家字体样本'),
-  },
-  {
-    title: '厂商字体样本',
-    note: '观察常见界面字体的渲染，需要实际字体列表时请查看系统设置。',
-    read: () => fontSamples(['Segoe UI', 'Helvetica Neue', 'Roboto'], 'Browser 0123'),
-  },
-  {
-    title: 'WebRTC 能力',
-    note: '仅查看实时通信接口是否可用。IP 地址未检测。',
-    read: () => typeof RTCPeerConnection === 'function' ? '实时通信接口可用' : '实时通信接口不可用',
-  },
-  {
-    title: '浏览器与网页容器',
-    note: '根据浏览器公开标记识别常见浏览器或应用内网页。',
-    read: () => {
-      const name = [
-        [/WxWork/i, '企业微信内置网页'],
-        [/MicroMessenger/i, '微信内置网页'],
-        [/\bEdg(?:A|iOS)?\//i, 'Microsoft Edge'],
-        [/\bOPR\//i, 'Opera'],
-        [/\b(?:Chrome|CriOS)\//i, 'Chrome 或 Chromium 浏览器'],
-        [/\b(?:Firefox|FxiOS)\//i, 'Firefox'],
-        [/\bSafari\//i, 'Safari'],
-      ].find(([pattern]) => pattern.test(navigator.userAgent));
-      return name?.[1] ?? '未识别到已知的浏览器标记';
-    },
-  },
-  {
-    title: '设备类型',
-    note: '展示浏览器报告的平台和移动设备提示。',
-    read: () => {
-      const info = navigator.userAgentData;
-      const platform = info?.platform || navigator.platform;
-      const mobile = info?.mobile ?? /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-      return `${platform || '平台未提供'} · ${mobile ? '移动设备标记' : '未报告移动设备标记'}`;
-    },
-  },
-  {
-    title: 'Intl 区域设置',
-    note: '读取浏览器用于日期和数字格式化的默认区域标记。',
-    read: () => {
-      const date = Intl.DateTimeFormat().resolvedOptions().locale;
-      const number = Intl.NumberFormat().resolvedOptions().locale;
-      return `日期 ${date} · 数字 ${number}`;
-    },
-  },
-  {
-    title: 'UTC 时区偏移',
-    note: '查看当前本地时间与 UTC 的偏移，数值可能随夏令时变化。',
-    read: () => {
-      const offset = -new Date().getTimezoneOffset();
-      const hour = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
-      const minute = String(Math.abs(offset) % 60).padStart(2, '0');
-      return `UTC${offset < 0 ? '−' : '+'}${hour}:${minute}`;
-    },
-  },
-  {
-    title: 'Emoji 渲染',
-    note: '在本页展示表情样例，方便观察是否显示异常。',
-    read: () => '显示样例 🧰 👷 👍 🏆',
-  },
-];
-
 const poses = [
   ['toolbox', '拿工具箱'],
   ['introduce', '介绍'],
@@ -205,42 +130,6 @@ function unknown(text) {
   return { state: 'unknown', label: '未知', text };
 }
 
-function fontSamples(fonts, sample) {
-  const canvas = document.createElement('canvas').getContext('2d');
-  if (!canvas) return '浏览器未开放字体样本测量';
-  const matching = fonts.filter((font) => ['monospace', 'serif'].some((fallback) => {
-    canvas.font = `32px ${fallback}`;
-    const baseline = canvas.measureText(sample).width;
-    canvas.font = `32px "${font}", ${fallback}`;
-    return Math.abs(canvas.measureText(sample).width - baseline) > 0.1;
-  }));
-  return matching.length ? '有渲染差异：' + matching.join('、') : '未测到所选字体的独立渲染';
-}
-
-function renderSignals(scanned = false) {
-  const rows = environmentSignals.map(({ title, note, read }) => {
-    const item = document.createElement('li');
-    const header = document.createElement('div');
-    header.className = 'signal-head';
-    const name = document.createElement('h3');
-    name.textContent = title;
-    const description = document.createElement('p');
-    description.className = 'signal-note';
-    description.textContent = note;
-    const value = document.createElement('p');
-    value.className = 'signal-value';
-    value.textContent = '待检查';
-    if (scanned) {
-      try { value.textContent = read() || '浏览器未提供'; }
-      catch { value.textContent = '当前浏览器无法读取'; }
-    }
-    header.append(name);
-    item.append(header, description, value);
-    return item;
-  });
-  $('signals').replaceChildren(...rows);
-}
-
 function loadPose(index) {
   if (!poseImages.has(index)) {
     const image = new Image();
@@ -270,9 +159,78 @@ async function showPose(index) {
   void loadPose((index + 1) % poses.length);
 }
 
-function updateDial(passed) {
-  $('dial-number').textContent = passed ?? '–';
-  $('dial').style.setProperty('--dial-value', `${(passed ?? 0) / browserChecks.length * 100}%`);
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.textContent = text;
+  return node;
+}
+
+function renderSignals(results) {
+  let total = 0;
+  let measured = 0;
+  const hits = [];
+  const rows = environmentSignals.map(({ title, note, weight }, index) => {
+    const result = results?.[index];
+    const points = result?.points;
+    const item = element('li', 'signal-row', '');
+    const header = element('div', 'signal-head', '');
+    const score = element('div', 'signal-score', '');
+    const state = points == null ? (result ? '未测得' : '待检查') : (points > 0 ? '命中' : '未命中');
+    item.dataset.result = points > 0 ? 'hit' : points === 0 ? 'miss' : 'unknown';
+    header.append(element('h3', '', title), element('span', 'signal-weight', '权重 ' + weight));
+    score.append(element('strong', '', points == null ? '—' : '+' + points), element('span', '', state));
+    item.append(header, element('p', 'signal-note', note), element('p', 'signal-value', result?.value ?? '待检查'), score);
+    if (points != null) {
+      measured += 1;
+      total += points;
+      if (points > 0) hits.push(element('li', 'hit-chip', `${title} +${points}`));
+    }
+    return item;
+  });
+  const possible = environmentSignals.reduce((sum, { weight }) => sum + weight, 0);
+  $('signals').replaceChildren(...rows);
+  $('hits').replaceChildren(...hits);
+  $('hit-summary').textContent = results
+    ? `${hits.length} 项命中 · ${measured} / ${rows.length} 项有结果`
+    : '开始检查后显示每项命中和得分。';
+  $('dial-number').textContent = measured ? total : '–';
+  $('dial').style.setProperty('--dial-value', `${total / possible * 100}%`);
+  $('signal-summary').textContent = results
+    ? `环境信号得分 ${measured ? total : '—'} / ${possible} · 已测 ${measured} 项`
+    : '环境信号待检查';
+}
+
+async function runIp() {
+  const button = $('ip-run');
+  button.disabled = true;
+  $('ip-result').hidden = true;
+  $('ip-status').textContent = '正在查询当前公网出口…';
+  const result = await checkPublicIp();
+  button.disabled = false;
+  if (result.error) {
+    $('ip-status').textContent = result.error;
+    return;
+  }
+  $('ip-score').textContent = result.purity ?? '—';
+  $('ip-type').textContent = result.type;
+  $('ip-address').textContent = result.ip;
+  $('ip-location').textContent = result.location || '未知';
+  $('ip-network').textContent = result.network || '未知';
+  $('ip-risk').textContent = result.risk === null
+    ? '数据源未提供风险值，纯净度待定。'
+    : `数据源风险 ${result.risk} 分 · 纯净度 = 100 − ${result.risk} = ${result.purity}`;
+  const flags = ipFlags.map(([key, title]) => {
+    const flag = result.flags[key];
+    const label = flag === true ? '已标记' : flag === false ? '未标记' : '未知';
+    const chip = element('li', 'ip-flag', `${title} · ${label}`);
+    chip.dataset.result = flag === true ? 'hit' : flag === false ? 'miss' : 'unknown';
+    return chip;
+  });
+  $('ip-flags').replaceChildren(...flags);
+  $('ip-result').hidden = false;
+  $('ip-status').textContent = '查询完成。';
+  button.textContent = '重新查询出口 IP';
 }
 
 function mark(key) {
@@ -359,7 +317,6 @@ function selectProvider(key) {
   $('feedback').textContent = '点击「开始检查」查看结果。';
   $('checked-at').textContent = '';
   mascot.dataset.scanning = 'false';
-  updateDial();
   renderSignals();
   renderChecks();
   start.disabled = false;
@@ -428,11 +385,15 @@ async function run() {
   });
   const passed = results.filter((item) => item.state === 'pass').length;
   renderChecks(results);
-  renderSignals(true);
-  updateDial(passed);
+  renderSignals();
   setMetric('local', `${passed} / ${results.length} 通过`, passed === results.length ? 'pass' : 'attention', '展开下方项目查看细节');
-  const [service] = await Promise.all([
+  const signalRead = readSignals(activeRequest.signal).then((signals) => {
+    if (request === activeRequest) renderSignals(signals);
+    return signals;
+  });
+  const [service, signals] = await Promise.all([
     fetchService(key, activeRequest),
+    signalRead,
     new Promise((resolve) => setTimeout(resolve, 460)),
   ]);
   if (request !== activeRequest) return;
@@ -442,8 +403,11 @@ async function run() {
   const time = new Date();
   $('checked-at').textContent = '本次检查 ' + time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   $('feedback').textContent = '检查完成。实际访问请从官方入口打开确认。';
+  const signalScore = $('signal-summary').textContent;
   report = [providers[key].name + ' · 检查结果', time.toLocaleString('zh-CN'), '浏览器条件 ' + passed + '/' + results.length + ' 通过',
     '官方服务状态：' + service.label + '。' + service.text,
+    signalScore,
+    ...signals.map(({ value, points }, i) => `${environmentSignals[i].title} · ${points === null ? '未测得' : '+' + points} · ${value}`),
     ...results.map((result, i) => browserChecks[i].title + '：' + result.label + ' · ' + result.text),
   ].join('\n');
   copy.disabled = false;
@@ -471,6 +435,7 @@ copy.addEventListener('click', async () => {
 });
 
 start.addEventListener('click', run);
+$('ip-run').addEventListener('click', runIp);
 mascot.addEventListener('click', () => void showPose((poseIndex + 1) % poses.length));
 $('back-top').addEventListener('click', (event) => {
   event.preventDefault();
