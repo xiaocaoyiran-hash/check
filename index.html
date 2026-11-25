@@ -13,51 +13,54 @@
   <a class="skip" href="#check">跳到检查台</a>
   <header class="top wrap" id="top">
     <a href="./" class="brand"><img src="./assets/logo.png" alt="研选家" width="90"><span>AI 工具检查台</span></a>
-    <nav aria-label="站点导航"><a href="#check">检查台</a><a href="#guide">使用说明</a><a href="https://xiaocaoyiran-hash.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">运营知识库 ↗</a></nav>
+    <nav aria-label="站点导航"><a href="#check">检查台</a><a href="#signals-title">检测信号</a><a href="#guide">使用说明</a><a href="https://xiaocaoyiran-hash.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">运营知识库 ↗</a></nav>
   </header>
 
   <main class="wrap">
-    <section class="hero" aria-labelledby="headline">
-      <div class="hero-copy">
-        <p class="eyebrow"><span></span> 工具可用性检查</p>
-        <h1 id="headline">AI 工具打不开？<br>先看问题<em>在哪。</em></h1>
-        <p class="hero-desc">查本机浏览器条件，也查官方服务状态。<br class="desktop"> 适合在开始工作前做一次快速排查。</p>
-        <a class="action primary" href="#check">打开检查台 <span aria-hidden="true">↓</span></a>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-        <span class="art-mark mark-a"></span><span class="art-mark mark-b"></span>
-        <img src="./assets/craftsman.webp" alt="" width="380" height="540" fetchpriority="high">
-      </div>
-    </section>
-
     <section id="check" class="check" aria-labelledby="check-title">
-      <div class="section-head">
-        <div><p class="eyebrow"><span></span> 选择工具</p><h2 id="check-title">开始检查</h2></div>
-        <p>无需输入账号、密码或 API 密钥。</p>
+      <div class="check-intro">
+        <h1 id="check-title"><em id="headline-provider">ChatGPT</em> 工具检测</h1>
+        <p>查看本机浏览器信号和官方服务状态。</p>
       </div>
       <fieldset class="tools" id="providers"><legend class="sr-only">选择 AI 工具</legend></fieldset>
-      <div class="dashboard">
+      <div class="panel dashboard">
+        <div class="mascot">
+          <button id="mascot" class="mascot-stage" type="button" aria-label="切换研选家工匠动作">
+            <span class="orbit orbit-a" aria-hidden="true"></span><span class="orbit orbit-b" aria-hidden="true"></span>
+            <span class="spark spark-a" aria-hidden="true"></span><span class="spark spark-b" aria-hidden="true"></span><span class="spark spark-c" aria-hidden="true"></span>
+            <img id="mascot-art" src="./assets/mascot/toolbox.webp" alt="" fetchpriority="high">
+          </button>
+          <p id="mascot-pose" class="mascot-pose" aria-live="polite">拿工具箱</p>
+          <span class="mascot-caption">点击工匠，切换动作</span>
+        </div>
         <article class="panel result">
-          <div class="panel-head">
-            <div class="selected"><div class="provider-mark" id="active-icon" aria-hidden="true"></div><div><h3 id="active-name">ChatGPT</h3><p id="active-scope">OpenAI · 网页服务</p></div></div>
-            <button id="run" class="action primary" type="button">开始检查 <span aria-hidden="true">→</span></button>
+          <div class="selected"><div class="provider-mark" id="active-icon" aria-hidden="true"></div><div><h2 id="active-name">ChatGPT</h2><p id="active-scope">OpenAI · 网页服务</p></div></div>
+          <div class="dial" id="dial" aria-hidden="true">
+            <div class="dial-content"><strong id="dial-number">–</strong><span>/ 6 项通过</span></div>
           </div>
           <dl class="metrics" aria-label="检查概览">
             <div><dt>浏览器条件</dt><dd id="local-summary" data-state="idle">待检查</dd><p id="local-caption">在线提示 · HTTPS · 存储等</p></div>
             <div><dt>官方服务状态</dt><dd id="service-summary" data-state="idle">待查看</dd><p id="service-caption">读取所选工具的官方状态</p></div>
           </dl>
           <p id="feedback" class="run-feedback" aria-live="polite">选择工具后，点击「开始检查」。</p>
-          <div class="result-actions"><span id="checked-at"></span><button class="text-button" id="copy" type="button" disabled>复制结果 ↗</button></div>
+          <div class="result-actions">
+            <button id="run" class="action primary" type="button">开始检查 <span aria-hidden="true">→</span></button>
+            <button class="action secondary" id="copy" type="button" disabled>复制结果</button>
+            <span id="checked-at"></span>
+          </div>
         </article>
-        <aside class="panel links" aria-labelledby="links-title">
-          <h3 id="links-title">官方入口</h3>
-          <p>在新标签页里确认实际访问和登录。</p>
-          <ul id="provider-links"></ul>
-        </aside>
       </div>
+      <aside class="panel links" aria-labelledby="links-title">
+        <h3 id="links-title">官方入口</h3>
+        <ul id="provider-links"></ul>
+      </aside>
+      <section class="panel signals" aria-labelledby="signals-title">
+        <div class="details-head"><h2 id="signals-title">检测哪些信号</h2><span>10 项环境观察</span></div>
+        <p class="signals-intro">环境信号帮助定位浏览器差异。上方圆环反映下面 6 项基础条件的通过数。</p>
+        <ol id="signals" class="signal-list"></ol>
+      </section>
       <div class="panel details">
-        <div class="details-head"><h3>检查明细</h3><span id="count-label">6 项浏览器条件</span></div>
+        <div class="details-head"><h3>基础条件明细</h3><span>6 项浏览器条件</span></div>
         <ul id="checks" class="check-list"></ul>
       </div>
       <noscript><p>开启 JavaScript 后可使用检查功能。你也可以直接访问 <a href="https://chatgpt.com/">ChatGPT</a>、<a href="https://gemini.google.com/">Gemini</a>、<a href="https://claude.ai/">Claude</a> 或 <a href="https://chat.deepseek.com/">DeepSeek</a>。</p></noscript>
