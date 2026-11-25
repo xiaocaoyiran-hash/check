@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#edf5f0">
+  <meta name="description" content="切换 ChatGPT、Gemini、Claude 或 DeepSeek，检查浏览器使用条件，查看官方服务状态和下一步。">
+  <title>AI 工具检查台 · 研选家</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.mjs" type="module"></script>
+</head>
+<body>
+  <a class="skip" href="#check">跳到检查台</a>
+  <header class="top wrap" id="top">
+    <a href="./" class="brand"><img src="./assets/logo.png" alt="研选家" width="90"><span>AI 工具检查台</span></a>
+    <nav aria-label="站点导航"><a href="#check">检查台</a><a href="#guide">使用说明</a><a href="https://xiaocaoyiran-hash.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">运营知识库 ↗</a></nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" aria-labelledby="headline">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> 工具可用性检查</p>
+        <h1 id="headline">AI 工具打不开？<br>先看问题<em>在哪。</em></h1>
+        <p class="hero-desc">查本机浏览器条件，也查官方服务状态。<br class="desktop"> 适合在开始工作前做一次快速排查。</p>
+        <a class="action primary" href="#check">打开检查台 <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <span class="art-mark mark-a"></span><span class="art-mark mark-b"></span>
+        <img src="./assets/craftsman.webp" alt="" width="380" height="540" fetchpriority="high">
+      </div>
+    </section>
+
+    <section id="check" class="check" aria-labelledby="check-title">
+      <div class="section-head">
+        <div><p class="eyebrow"><span></span> 选择工具</p><h2 id="check-title">开始检查</h2></div>
+        <p>无需输入账号、密码或 API 密钥。</p>
+      </div>
+      <fieldset class="tools" id="providers"><legend class="sr-only">选择 AI 工具</legend></fieldset>
+      <div class="dashboard">
+        <article class="panel result">
+          <div class="panel-head">
+            <div class="selected"><div class="provider-mark" id="active-icon" aria-hidden="true"></div><div><h3 id="active-name">ChatGPT</h3><p id="active-scope">OpenAI · 网页服务</p></div></div>
+            <button id="run" class="action primary" type="button">开始检查 <span aria-hidden="true">→</span></button>
+          </div>
+          <dl class="metrics" aria-label="检查概览">
+            <div><dt>浏览器条件</dt><dd id="local-summary" data-state="idle">待检查</dd><p id="local-caption">在线提示 · HTTPS · 存储等</p></div>
+            <div><dt>官方服务状态</dt><dd id="service-summary" data-state="idle">待查看</dd><p id="service-caption">读取所选工具的官方状态</p></div>
+          </dl>
+          <p id="feedback" class="run-feedback" aria-live="polite">选择工具后，点击「开始检查」。</p>
+          <div class="result-actions"><span id="checked-at"></span><button class="text-button" id="copy" type="button" disabled>复制结果 ↗</button></div>
+        </article>
+        <aside class="panel links" aria-labelledby="links-title">
+          <h3 id="links-title">官方入口</h3>
+          <p>在新标签页里确认实际访问和登录。</p>
+          <ul id="provider-links"></ul>
+        </aside>
+      </div>
+      <div class="panel details">
+        <div class="details-head"><h3>检查明细</h3><span id="count-label">6 项浏览器条件</span></div>
+        <ul id="checks" class="check-list"></ul>
+      </div>
+      <noscript><p>开启 JavaScript 后可使用检查功能。你也可以直接访问 <a href="https://chatgpt.com/">ChatGPT</a>、<a href="https://gemini.google.com/">Gemini</a>、<a href="https://claude.ai/">Claude</a> 或 <a href="https://chat.deepseek.com/">DeepSeek</a>。</p></noscript>
+    </section>
+
+    <section id="guide" class="guide" aria-labelledby="guide-title">
+      <div class="section-head"><div><p class="eyebrow"><span></span> 使用说明</p><h2 id="guide-title">怎么读结果</h2></div></div>
+      <div class="guide-grid">
+        <article><h3>浏览器有提示</h3><p>展开对应项目，查看浏览器当前报告的条件。改动设置后可以重新检查。</p></article>
+        <article><h3>官方通报异常</h3><p>打开官方状态页，确认受影响的产品和故障进展。Gemini 的自动结果取自 Workspace 状态页。</p></article>
+        <article><h3>需要查账号权限</h3><p>通过官方入口实际登录确认。检测结果只覆盖浏览器条件和可读取的官方状态。</p></article>
+      </div>
+      <details class="privacy">
+        <summary>检测会读取哪些信息？</summary>
+        <p>浏览器项目在本页运行。点击检查时，浏览器直接向官方状态源发起请求，状态源会收到普通网页请求的网络信息。本站没有接收检测结果的服务器。</p>
+      </details>
+    </section>
+  </main>
+  <footer class="wrap foot"><span>研选家 · AI 工具检查台</span><a href="#top" id="back-top">返回顶部 ↑</a></footer>
+</body>
+</html>
