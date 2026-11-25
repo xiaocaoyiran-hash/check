@@ -34,13 +34,6 @@ const providers = {
       ['查看支持的国家和地区', 'https://www.anthropic.com/supported-countries'],
     ],
   },
-  deepseek: {
-    name: 'DeepSeek', mark: 'D', scope: 'DeepSeek · 网页对话',
-    links: [
-      ['打开 DeepSeek', 'https://chat.deepseek.com/'],
-      ['查看 DeepSeek 状态', 'https://status.deepseek.com/'],
-    ],
-  },
 };
 
 const browserChecks = [
@@ -184,7 +177,11 @@ function renderSignals(results) {
     if (points != null) {
       measured += 1;
       total += points;
-      if (points > 0) hits.push(element('li', 'hit-chip', `${title} +${points}`));
+      if (points > 0) {
+        const hit = element('li', 'hit-chip', title + ' ');
+        hit.append(element('strong', 'score-gain', '+' + points));
+        hits.push(hit);
+      }
     }
     return item;
   });
@@ -217,9 +214,16 @@ async function runIp() {
   $('ip-address').textContent = result.ip;
   $('ip-location').textContent = result.location || '未知';
   $('ip-network').textContent = result.network || '未知';
-  $('ip-risk').textContent = result.risk === null
-    ? '数据源未提供风险值，纯净度待定。'
-    : `数据源风险 ${result.risk} 分 · 纯净度 = 100 − ${result.risk} = ${result.purity}`;
+  const formula = $('ip-risk');
+  if (result.risk === null) {
+    formula.textContent = '数据源未提供风险值，纯净度待定。';
+  } else {
+    formula.replaceChildren(
+      '数据源风险 ' + result.risk + ' 分 · 纯净度 = 100 ',
+      element('strong', 'score-deduction', '− ' + result.risk),
+      ' = ' + result.purity,
+    );
+  }
   const flags = ipFlags.map(([key, title]) => {
     const flag = result.flags[key];
     const label = flag === true ? '已标记' : flag === false ? '未标记' : '未知';
@@ -351,7 +355,6 @@ function parseStatusPage(provider, data) {
 
 async function fetchService(key, controller) {
   const provider = providers[key];
-  if (!provider.feed) return unknown('请打开 DeepSeek 官方状态页查看实时通报。');
   const timer = setTimeout(() => controller.abort(), 7500);
   try {
     const response = await fetch(provider.feed, {
